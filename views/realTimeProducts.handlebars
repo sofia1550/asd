@@ -1,53 +1,53 @@
-<!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Productos en Tiempo Real</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Productos en Tiempo Real</h1>
 
     <!-- Formulario para agregar productos -->
     <form id="addProductForm">
-        <input type="text" id="title" placeholder="Título del producto">
-        <input type="number" id="price" placeholder="Precio">
-        <button type="submit">Agregar Producto</button>
+      <input type="text" id="title" placeholder="Título del producto" />
+      <input type="number" id="price" placeholder="Precio" />
+      <button type="submit">Agregar Producto</button>
     </form>
+
+    <!-- Formulario de edición oculto -->
+    <div id="editForm" style="display: none;">
+      <input type="text" id="editTitle" placeholder="Título del producto" />
+      <input type="number" id="editPrice" placeholder="Precio" />
+      <button onclick="submitEdit()">Guardar Cambios</button>
+    </div>
 
     <ul id="productList">
     </ul>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-
-        const socket = io();
-  function editProduct(id) {
-        const updatedData = {  };
-        socket.emit('editProduct', id, updatedData);
-    }
-
-    function deleteProduct(id) {
-        socket.emit('deleteProduct', id);
-    }
-
-   socket.on('updateProductList', function(products) {
-        const productList = document.getElementById('productList');
-        productList.innerHTML = '';
-        products.forEach(product => {
-            productList.innerHTML += `
-                <li>
-                    ${product.title} - ${product.price}
-                    <button onclick="editProduct(${product.id})">Editar</button>
-                    <button onclick="deleteProduct(${product.id})">Eliminar</button>
-                </li>`;
-        });
-    });
-
-        document.getElementById('addProductForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const title = document.getElementById('title').value;
-            const price = document.getElementById('price').value;
-            socket.emit('addProduct', { title, price });
-        });
+      const socket = io(); function editProduct(id, title, price) {
+      document.getElementById('editForm').style.display = 'block';
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editPrice').value = price;
+      document.getElementById('editForm').dataset.productId = id; } function
+      submitEdit() { const id =
+      document.getElementById('editForm').dataset.productId; const updatedTitle
+      = document.getElementById('editTitle').value; const updatedPrice =
+      document.getElementById('editPrice').value; socket.emit('editProduct', id,
+      { title: updatedTitle, price: updatedPrice });
+      document.getElementById('editForm').style.display = 'none'; } function
+      deleteProduct(id) { socket.emit('deleteProduct', id); }
+      socket.on('updateProductList', function(products) { const productList =
+      document.getElementById('productList'); productList.innerHTML = '';
+      products.forEach(product => { productList.innerHTML += ` <li>
+      ${product.title} - ${product.price} <button
+      onclick="editProduct(${product.id}, '${product.title}',
+      ${product.price})">Editar</button> <button
+      onclick="deleteProduct(${product.id})">Eliminar</button> </li>`; }); });
+      document.getElementById('addProductForm').addEventListener('submit',
+      function(e) { e.preventDefault(); const title =
+      document.getElementById('title').value; const price =
+      document.getElementById('price').value; socket.emit('addProduct', { title,
+      price }); });
     </script>
-</body>
+  </body>
 </html>
