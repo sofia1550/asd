@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
 
 app.use('/api/products', require('../routes/products')(io));
-app.use('/api/carts', cartRoutes);  
+app.use('/api/carts', cartRoutes);
 
 const PORT = 8080;
 server.listen(PORT, () => {
@@ -49,7 +49,13 @@ io.on('connection', (socket) => {
     writeProductsFile(products);
     io.emit('updateProductList', products);
   });
+  socket.on('editProduct', (id, updatedData) => {
+    productsController.updateProduct(id, updatedData);
+  });
 
+  socket.on('deleteProduct', (productId) => {
+    productsController.deleteProduct(productId);
+  });
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');
   });

@@ -1,7 +1,7 @@
 module.exports = function (io) {
     const fs = require('fs');
     const path = require('path');
-    const productsFilePath = path.join(__dirname, '../data/products.json');
+    const productsFilePath = path.join(__dirname, '../src/data/products.json');
 
     function readProductsFile() {
         try {
@@ -73,15 +73,16 @@ module.exports = function (io) {
         }
     };
 
-    const deleteProduct = (req, res) => {
+    // En productsController.js
+
+    const deleteProduct = (productId) => {
         let products = readProductsFile();
-        const filteredProducts = products.filter(p => p.id !== parseInt(req.params.pid));
+        const filteredProducts = products.filter(p => p.id !== parseInt(productId));
         if (filteredProducts.length !== products.length) {
             writeProductsFile(filteredProducts);
-            io.emit('updateProductList', filteredProducts); // Emitir evento
-            res.send('Producto eliminado');
+            io.emit('updateProductList', filteredProducts);
         } else {
-            res.status(404).send('Producto no encontrado');
+            io.emit('productError', 'Producto no encontrado');
         }
     };
 

@@ -18,16 +18,31 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+
         const socket = io();
+  function editProduct(id) {
+        // Aquí podrías abrir un formulario para editar o directamente enviar una solicitud de edición
+        const updatedData = { /* ... datos actualizados ... */ };
+        socket.emit('editProduct', id, updatedData);
+    }
+
+    function deleteProduct(id) {
+        socket.emit('deleteProduct', id);
+    }
 
         // Manejar la actualización de la lista de productos
-        socket.on('updateProductList', function(products) {
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '';
-            products.forEach(product => {
-                productList.innerHTML += `<li>${product.title} - ${product.price}</li>`;
-            });
+   socket.on('updateProductList', function(products) {
+        const productList = document.getElementById('productList');
+        productList.innerHTML = '';
+        products.forEach(product => {
+            productList.innerHTML += `
+                <li>
+                    ${product.title} - ${product.price}
+                    <button onclick="editProduct(${product.id})">Editar</button>
+                    <button onclick="deleteProduct(${product.id})">Eliminar</button>
+                </li>`;
         });
+    });
 
         // Enviar nuevo producto al servidor
         document.getElementById('addProductForm').addEventListener('submit', function(e) {
