@@ -23,7 +23,6 @@ app.use('/api/products', productRoutes(io));
 app.use('/api/carts', cartRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => res.render('home', { title: 'Inicio' }));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
 
 const PORT = 8080;
@@ -33,6 +32,11 @@ server.listen(PORT, () => {
 
 io.on('connection', (socket) => {
   console.log('Un cliente se ha conectado');
+  
+  // Envía la lista actual de productos al cliente recién conectado
+  const products = readProductsFile();
+  socket.emit('updateProductList', products);
+
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');
   });
