@@ -5,6 +5,14 @@
 </head>
 <body>
     <h1>Productos en Tiempo Real</h1>
+
+    <!-- Formulario para agregar productos -->
+    <form id="addProductForm">
+        <input type="text" id="title" placeholder="Título del producto">
+        <input type="number" id="price" placeholder="Precio">
+        <button type="submit">Agregar Producto</button>
+    </form>
+
     <ul id="productList">
     </ul>
 
@@ -12,12 +20,21 @@
     <script>
         const socket = io();
 
+        // Manejar la actualización de la lista de productos
         socket.on('updateProductList', function(products) {
             const productList = document.getElementById('productList');
             productList.innerHTML = '';
             products.forEach(product => {
                 productList.innerHTML += `<li>${product.title} - ${product.price}</li>`;
             });
+        });
+
+        // Enviar nuevo producto al servidor
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const price = document.getElementById('price').value;
+            socket.emit('addProduct', { title, price });
         });
     </script>
 </body>

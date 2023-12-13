@@ -90,6 +90,7 @@ module.exports = function (io) {
         getProductById,
         createProduct,
         updateProduct,
-        deleteProduct
+        deleteProduct,
+        generateNewId
     };
 };

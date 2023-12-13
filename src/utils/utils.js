@@ -10,5 +10,11 @@ function readProductsFile() {
         return [];
     }
 }
-
-module.exports = { readProductsFile };
+function writeProductsFile(data) {
+    try {
+        fs.writeFileSync(productsFilePath, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Error escribiendo en el archivo de productos:', error);
+    }
+}
+module.exports = { readProductsFile, writeProductsFile  };
