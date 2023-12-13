@@ -52,26 +52,23 @@ module.exports = function (io) {
         }
         products.push(newProduct);
         writeProductsFile(products);
-        io.emit('updateProductList', products); // Emitir evento
+        io.emit('updateProductList', products); 
         res.status(201).send(newProduct);
     };
 
-    const updateProduct = (req, res) => {
+
+    const updateProduct = (productId, updatedData) => {
         const products = readProductsFile();
-        const index = products.findIndex(p => p.id === parseInt(req.params.pid));
+        const index = products.findIndex(p => p.id === parseInt(productId));
         if (index !== -1) {
-            const updatedProduct = { ...products[index], ...req.body };
-            if (!validateProductFields(updatedProduct)) {
-                return res.status(400).send('Faltan campos requeridos o son inválidos');
-            }
-            products[index] = updatedProduct;
+            products[index] = { ...products[index], ...updatedData };
             writeProductsFile(products);
-            io.emit('updateProductList', products); // Emitir evento al actualizar
-            res.send(products[index]);
+            io.emit('updateProductList', products);
         } else {
-            res.status(404).send('Producto no encontrado');
+            io.emit('productError', 'Producto no encontrado');
         }
     };
+
 
     // En productsController.js
 

@@ -49,8 +49,8 @@ io.on('connection', (socket) => {
     writeProductsFile(products);
     io.emit('updateProductList', products);
   });
-  socket.on('editProduct', (id, updatedData) => {
-    productsController.updateProduct(id, updatedData);
+  socket.on('editProduct', (productId, updatedData) => {
+    productsController.updateProduct(productId, updatedData);
   });
 
   socket.on('deleteProduct', (productId) => {
