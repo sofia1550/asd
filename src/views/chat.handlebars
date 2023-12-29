@@ -60,6 +60,7 @@
             background-color: #4cae4c;
         }
     </style>
+    
 </head>
 <body>
     <div id="chat-container">
@@ -67,30 +68,42 @@
             <!-- Los mensajes se añadirán aquí dinámicamente -->
         </ul>
         <form id="message-form">
+            <input id="user-email" type="email" placeholder="Tu correo electrónico" required />
+
             <input id="message-input" type="text" placeholder="Escribe tu mensaje aquí..." autocomplete="off" required />
             <button type="submit">Enviar</button>
         </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
+   <script>
         const socket = io();
 
         document.getElementById('message-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const messageInput = document.getElementById('message-input');
-            const messageText = messageInput.value.trim();
-            if (messageText) {
-                socket.emit('newMessage', { message: messageText, user: 'correo@example.com' });
-                messageInput.value = '';
-            }
-        });
-
+       e.preventDefault();
+       const userEmail = document.getElementById('user-email').value;
+       const messageInput = document.getElementById('message-input');
+       const messageText = messageInput.value.trim();
+       if (messageText && userEmail) {
+           socket.emit('newMessage', { message: messageText, user: userEmail });
+           messageInput.value = '';
+        }
+          });
         socket.on('message', function(message) {
             const messagesList = document.getElementById('messages');
             const newMessageItem = document.createElement('li');
             newMessageItem.textContent = `${message.user}: ${message.message}`;
             messagesList.appendChild(newMessageItem);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        });
+
+        socket.on('previousMessages', function(messages) {
+            const messagesList = document.getElementById('messages');
+            messages.forEach(function(message) {
+                const newMessageItem = document.createElement('li');
+                newMessageItem.textContent = `${message.user}: ${message.message}`;
+                messagesList.appendChild(newMessageItem);
+            });
             messagesList.scrollTop = messagesList.scrollHeight;
         });
     </script>
