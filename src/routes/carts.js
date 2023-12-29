@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const cartsController = require('../controllers/cartsController');
+const cartsController = require('../dao/mongo/cartsController');
 
 router.post('/', cartsController.createCart);
 router.get('/:cid', cartsController.getCartProducts);
