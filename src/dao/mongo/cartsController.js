@@ -21,6 +21,39 @@ module.exports = {
             res.status(500).json({ error: error.message });
         }
     },
+    removeProductFromCart: async (req, res) => {
+        try {
+            const cart = await Cart.findById(req.params.cid);
+            if (!cart) return res.status(404).send('Carrito no encontrado');
+
+            const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
+            if (productIndex !== -1) {
+                cart.products.splice(productIndex, 1);
+                await cart.save();
+                res.send('Producto eliminado del carrito');
+            } else {
+                res.status(404).send('Producto no encontrado en el carrito');
+            }
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+    checkoutCart: async (req, res) => {
+        try {
+            const cart = await Cart.findById(req.params.cid).populate('products.product');
+            if (!cart) return res.status(404).send('Carrito no encontrado');
+
+            // Aquí iría la lógica para procesar la compra, como reducir el stock, generar una orden, etc.
+
+            // Vaciar el carrito
+            cart.products = [];
+            await cart.save();
+
+            res.send('Compra realizada con éxito');
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
 
     addProductToCart: async (req, res) => {
         try {
