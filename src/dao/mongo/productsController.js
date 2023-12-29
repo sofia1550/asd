@@ -46,16 +46,18 @@ module.exports = function (io) {
         }
     };
 
-    const deleteProduct = async (productId) => {
+    const deleteProduct = async (productId, res) => {
         try {
             const product = await Product.findByIdAndDelete(productId);
             if (!product) {
                 io.emit('productError', 'Producto no encontrado');
-                return;
+                return res.status(404).send('Producto no encontrado');
             }
             io.emit('updateProductList', await Product.find({}));
+            res.send('Producto eliminado con éxito');
         } catch (error) {
             io.emit('productError', error.message);
+            res.status(500).json({ error: error.message });
         }
     };
 

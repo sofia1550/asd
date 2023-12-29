@@ -7,7 +7,8 @@ module.exports = function(io) {
     router.get('/:pid', productsController.getProductById);
     router.post('/', productsController.createProduct);
     router.put('/:pid', productsController.updateProduct);
-    router.delete('/:pid', productsController.deleteProduct);
-
+    router.delete('/:pid', async (req, res) => {
+        await productsController.deleteProduct(req.params.pid, res);
+    });
     return router;
 };
