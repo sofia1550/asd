@@ -6,7 +6,7 @@ const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const path = require('path');
 const mongoose = require('mongoose');
-
+const Product = require('./dao/models/products');
 // Conexión a MongoDB utilizando la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conectado a MongoDB Atlas'))
@@ -15,9 +15,14 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-
+const handlebars = engine({
+  runtimeOptions: {
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
+  },
+});
 // Configuración de Handlebars y rutas estáticas
-app.engine('handlebars', engine());
+app.engine('handlebars', handlebars);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
@@ -28,7 +33,15 @@ const cartRoutes = require('./routes/carts');
 const productRoutes = require('./routes/products')(io);
 
 // Rutas
-app.get('/', (req, res) => res.render('home'));
+app.get('/', async (req, res) => {
+  try {
+      const products = await Product.find({});
+      res.render('home', { products });
+  } catch (error) {
+      console.error('Error al obtener productos:', error);
+      res.status(500).send('Error al cargar la página');
+  }
+});
 app.use('/api/products', productRoutes);
 app.use('/api/carts', cartRoutes);
 
