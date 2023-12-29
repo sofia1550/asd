@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" href="/path/to/your/styles.css"> <!-- Asegúrate de enlazar tu hoja de estilos -->
+</head>
+<body>
+    <h1>Carrito de Compras</h1>
+
+    {{#if cart.products}}
+        <ul id="cartList">
+            {{#each cart.products}}
+                <li class="cart-item">
+                    <h3>{{this.product.title}}</h3>
+                    <p>Cantidad: {{this.quantity}}</p>
+                    <button onclick="updateQuantity('{{this.product._id}}', 'increment')">+</button>
+                    <button onclick="updateQuantity('{{this.product._id}}', 'decrement')">-</button>
+                    <button onclick="removeFromCart('{{this.product._id}}')">Eliminar</button>
+                </li>
+            {{/each}}
+        </ul>
+        <button onclick="checkoutCart()">Checkout</button>
+    {{else}}
+        <p>Tu carrito está vacío.</p>
+    {{/if}}
+
+    <script src="/path/to/your/script.js"></script> <!-- Asegúrate de enlazar tu archivo JavaScript -->
+</body>
+</html>

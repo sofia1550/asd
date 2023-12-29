@@ -46,6 +46,16 @@ function updateProduct(productId, updatedData) {
     }
     return null;
 }
+const getAllProducts = async (req, res) => {
+    try {
+        const { category, limit = 10 } = req.query;
+        const query = category ? { category } : {};
+        const products = await Product.find(query).limit(parseInt(limit));
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 function deleteProduct(productId) {
     let products = readProductsFile();
@@ -56,10 +66,26 @@ function deleteProduct(productId) {
     }
     return false;
 }
+const createProduct = async (req, res) => {
+    try {
+        const { title, description, code, price, stock, category, thumbnails } = req.body;
+        if (price < 0 || stock < 0) {
+            return res.status(400).send('Precio o stock inválido.');
+        }
+        const newProduct = new Product({ title, description, code, price, stock, category, thumbnails });
+        await newProduct.save();
+        io.emit('updateProductList', await Product.find({}));
+        res.status(201).json(newProduct);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     createProduct,
     getProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getAllProducts,
+    createProduct, 
 };

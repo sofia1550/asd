@@ -3,11 +3,33 @@ const Product = require('../models/products');
 module.exports = function (io) {
     const getAllProducts = async (req, res) => {
         try {
-            const limit = parseInt(req.query.limit);
-            const products = await Product.find({}).limit(limit);
-            res.json(products);
+            const { limit = 10, page = 1, sort = '', query = '' } = req.query;
+            const options = {
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+                sort: { price: sort === 'desc' ? -1 : 1 }
+            };
+
+            let filter = {};
+            if (query) {
+                filter = { title: { $regex: query, $options: 'i' } };
+            }
+
+            const result = await Product.paginate(filter, options);
+            res.json({
+                status: 'success',
+                payload: result.docs,
+                totalPages: result.totalPages,
+                prevPage: result.prevPage,
+                nextPage: result.nextPage,
+                page: result.page,
+                hasPrevPage: result.hasPrevPage,
+                hasNextPage: result.hasNextPage,
+                prevLink: result.prevPage ? `/api/products?page=${result.prevPage}` : null,
+                nextLink: result.nextPage ? `/api/products?page=${result.nextPage}` : null
+            });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ status: 'error', error: error.message });
         }
     };
 
