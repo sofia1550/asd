@@ -19,5 +19,16 @@ module.exports = function (io) {
             res.status(500).json({ error: error.message });
         }
     });
+    router.get('/cart', async (req, res) => {
+        const cartId = req.query.cartId; // Obtén el ID del carrito desde el query string
+        try {
+            const cart = await Cart.findById(cartId).populate('products.product');
+            if (!cart) return res.status(404).send('Carrito no encontrado');
+            res.render('cart', { cart });
+        } catch (error) {
+            console.error('Error al obtener el carrito:', error);
+            res.status(500).send('Error al cargar la página');
+        }
+    });
     return router;
 };
