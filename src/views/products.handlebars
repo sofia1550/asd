@@ -1,37 +1,43 @@
-<!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Lista de Productos</title>
-    <link rel="stylesheet" href="/path/to/your/styles.css"> <!-- Asegúrate de enlazar tu hoja de estilos -->
-</head>
-<body>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Asegúrate de enlazar tu hoja de estilos -->
+  </head>
+  <body>
     <h1>Lista de Productos</h1>
 
     <ul id="productList">
-        {{#each products}}
-            <li class="product-item">
-                <h3>{{this.title}}</h3>
-                <p>{{this.description}}</p>
-                <p>Precio: {{this.price}}$</p>
-                {{#if this.thumbnails}}
-                    <img src="{{this.thumbnails[0]}}" alt="{{this.title}}" class="product-image"/>
-                {{/if}}
-                <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
-            </li>
-        {{/each}}
+      {{#each products}}
+        <li class="product-item">
+          <h3>{{this.title}}</h3>
+          <p>{{this.description}}</p>
+          <p>Precio: {{this.price}}$</p>
+          {{#if this.thumbnails}}
+           <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image"/>
+
+          {{/if}}
+
+          <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
+        </li>
+      {{/each}}
     </ul>
 
     <div id="pagination">
-        {{#if hasPrevPage}}
-            <a href="?page={{prevPage}}">&laquo; Anterior</a>
-        {{/if}}
-        Página {{page}} de {{totalPages}}
-        {{#if hasNextPage}}
-            <a href="?page={{nextPage}}">Siguiente &raquo;</a>
-        {{/if}}
+      {{#if hasPrevPage}}
+        <a href="?page={{prevPage}}">&laquo; Anterior</a>
+      {{/if}}
+      Página
+      {{page}}
+      de
+      {{totalPages}}
+      {{#if hasNextPage}}
+        <a href="?page={{nextPage}}">Siguiente &raquo;</a>
+      {{/if}}
     </div>
 
-    <script src="/path/to/your/script.js"></script> <!-- Asegúrate de enlazar tu archivo JavaScript -->
-</body>
+    <script src="/main.js"></script>
+    <!-- Asegúrate de enlazar tu archivo JavaScript -->
+  </body>
 </html>

@@ -55,30 +55,29 @@
             document.getElementById('editForm').dataset.productId = id;
         }
 
-    function submitEdit() {
-    const id = document.getElementById('editForm').dataset.productId;
-    const updatedTitle = document.getElementById('editTitle').value;
-    const updatedPrice = parseFloat(document.getElementById('editPrice').value);
+        function submitEdit() {
+            const id = document.getElementById('editForm').dataset.productId;
+            const updatedTitle = document.getElementById('editTitle').value;
+            const updatedPrice = parseFloat(document.getElementById('editPrice').value);
 
-    fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title: updatedTitle, price: updatedPrice })
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Error al actualizar el producto');
+            fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: updatedTitle, price: updatedPrice })
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al actualizar el producto');
+                }
+                return response.json();
+            }).then(() => {
+                document.getElementById('editForm').style.display = 'none';
+                loadProducts();
+            }).catch(error => {
+                console.error('Hubo un problema con la solicitud de edición:', error);
+            });
         }
-        return response.json();
-    }).then(() => {
-        document.getElementById('editForm').style.display = 'none';
-        loadProducts();
-    }).catch(error => {
-        console.error('Hubo un problema con la solicitud de edición:', error);
-    });
-}
-
 
 
 

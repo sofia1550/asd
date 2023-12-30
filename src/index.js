@@ -25,6 +25,8 @@ const handlebars = engine({
     allowProtoMethodsByDefault: true,
   },
 });
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.engine('handlebars', handlebars);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
@@ -47,6 +49,8 @@ app.get('/', async (req, res) => {
     res.status(500).send('Error al cargar la página');
   }
 });
+app.get('/cart', (req, res) => res.render('cart'));
+
 app.get('/chat', (req, res) => res.render('chat'));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
 app.get('/products', async (req, res) => {

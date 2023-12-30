@@ -1,13 +1,12 @@
 const Cart = require('../models/cart');
 const Product = require('../models/products');
-router.delete('/api/carts/:cid/products/:pid', cartsController.removeProductFromCart);
 
 module.exports = {
     createCart: async (req, res) => {
         try {
             const newCart = new Cart({ products: [] });
             await newCart.save();
-            res.status(201).json(newCart);
+            res.status(201).json({ _id: newCart._id }); // Devuelve el ID del carrito
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
@@ -88,23 +87,31 @@ module.exports = {
         }
     },
     addProductToCart: async (req, res) => {
+        const { productId } = req.body;
+        const cartId = req.params.cid;
+
         try {
-            const cart = await Cart.findById(req.params.cid);
+            const cart = await Cart.findById(cartId);
             if (!cart) return res.status(404).send('Carrito no encontrado');
 
-            const product = await Product.findById(req.params.pid);
+            const product = await Product.findById(productId);
             if (!product) return res.status(404).send('Producto no encontrado');
+
 
             // Verificar disponibilidad y estado del producto
             if (product.stock <= 0 || !product.status) {
                 return res.status(400).send('Producto no disponible');
             }
 
-            const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
+            // Buscar si el producto ya está en el carrito
+            const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
+
+            // Si el producto ya está en el carrito, aumentar cantidad
+            // De lo contrario, agregar el nuevo producto al carrito
             if (productIndex !== -1) {
                 cart.products[productIndex].quantity += 1;
             } else {
-                cart.products.push({ product: req.params.pid, quantity: 1 });
+                cart.products.push({ product: productId, quantity: 1 });
             }
 
             await cart.save();
@@ -113,4 +120,5 @@ module.exports = {
             res.status(500).json({ error: error.message });
         }
     }
+
 };

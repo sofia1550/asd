@@ -1,4 +1,4 @@
-module.exports = function(io) {
+module.exports = function (io) {
     const express = require('express');
     const router = express.Router();
     const productsController = require('../dao/mongo/productsController')(io);
@@ -9,6 +9,15 @@ module.exports = function(io) {
     router.put('/:pid', productsController.updateProduct);
     router.delete('/:pid', async (req, res) => {
         await productsController.deleteProduct(req.params.pid, res);
+    });
+    router.get('/create-cart', async (req, res) => {
+        try {
+            const newCart = new Cart({ products: [] });
+            await newCart.save();
+            res.json({ cartId: newCart._id });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     });
     return router;
 };
