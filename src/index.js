@@ -55,37 +55,39 @@ app.get('/chat', (req, res) => res.render('chat'));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
 app.get('/products', async (req, res) => {
   try {
-    const { page = 1, limit = 10, sort = '', query = '' } = req.query;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 3; // Cambiado de 10 a 3
 
-    // Crear objeto de filtros basado en el query, si existe
-    const filterOptions = query ? { title: { $regex: query, $options: 'i' } } : {};
+      // Crear objeto de filtros basado en el query, si existe
+      const filterOptions = req.query.query ? { title: { $regex: req.query.query, $options: 'i' } } : {};
 
-    // Opciones de ordenamiento
-    const sortOptions = sort === 'desc' ? { price: -1 } : sort === 'asc' ? { price: 1 } : {};
+      // Opciones de ordenamiento
+      const sortOptions = req.query.sort === 'desc' ? { price: -1 } : req.query.sort === 'asc' ? { price: 1 } : {};
 
-    const products = await Product.find(filterOptions)
-      .sort(sortOptions)
-      .limit(parseInt(limit))
-      .skip((page - 1) * limit);
+      const products = await Product.find(filterOptions)
+        .sort(sortOptions)
+        .limit(limit)
+        .skip((page - 1) * limit);
 
-    const totalProducts = await Product.countDocuments(filterOptions);
-    const totalPages = Math.ceil(totalProducts / limit);
+      const totalProducts = await Product.countDocuments(filterOptions);
+      const totalPages = Math.ceil(totalProducts / limit);
 
-    res.render('products', {
-      products,
-      currentPage: parseInt(page),
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1,
-      nextPage: page + 1,
-      prevPage: page - 1,
-      lastPage: totalPages
-    });
+      res.render('products', {
+          products,
+          currentPage: page,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+          nextPage: page + 1,
+          prevPage: page - 1,
+          lastPage: totalPages
+      });
   } catch (error) {
-    console.error('Error al obtener productos:', error);
-    res.status(500).send('Error al cargar la página');
+      console.error('Error al obtener productos:', error);
+      res.status(500).send('Error al cargar la página');
   }
 });
+
 app.get('/carts/:cid', async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid).populate('products.product');
