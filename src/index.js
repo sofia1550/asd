@@ -88,14 +88,15 @@ app.get('/products', async (req, res) => {
   }
 });
 
-app.get('/carts/:cid', async (req, res) => {
+app.get('/cart/:cid', async (req, res) => {
   try {
-    const cart = await Cart.findById(req.params.cid).populate('products.product');
-    if (!cart) return res.status(404).send('Carrito no encontrado');
-    res.render('cart', { cart });
+      const cartId = req.params.cid;
+      const cart = await Cart.findById(cartId).populate('products.product');
+      if (!cart) return res.status(404).render('cart', { cart: null });
+      res.render('cart', { cart: cart.products });
   } catch (error) {
-    console.error('Error al obtener el carrito:', error);
-    res.status(500).send('Error al cargar la página');
+      console.error('Error al obtener el carrito:', error);
+      res.status(500).render('cart', { error: 'Error al cargar el carrito' });
   }
 });
 

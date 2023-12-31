@@ -2,6 +2,15 @@
 function getCartId() {
     return localStorage.getItem('cartId');
 }
+function redirectToCart() {
+    const cartId = getCartId();
+    if (cartId) {
+        window.location.href = `/cart/${cartId}`;
+    } else {
+        console.error('No hay un carrito disponible');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     if (!getCartId()) {
         try {
@@ -18,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 async function addToCart(productId) {
-    const cartId = getCartId(); // Obtener el ID del carrito
+    const cartId = getCartId();
     if (!cartId) {
         console.error('No hay un carrito disponible');
         return;
@@ -38,6 +47,8 @@ async function addToCart(productId) {
     } catch (error) {
         console.error('Error:', error);
     }
+    redirectToCart();
+
 }
 
 // Función para actualizar la cantidad de un producto en el carrito
