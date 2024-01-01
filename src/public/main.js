@@ -99,8 +99,8 @@ async function updateQuantity(cartId, productId, operation) {
         });
         if (response.ok) {
             try {
-                const updatedProduct = await response.json(); 
-                document.querySelector(`#quantity_${productId}`).textContent = updatedProduct.quantity; 
+                const updatedProduct = await response.json();
+                document.querySelector(`#quantity_${productId}`).textContent = updatedProduct.quantity;
             } catch (error) {
                 console.error('Error al parsear la respuesta JSON:', error);
             }
@@ -116,16 +116,29 @@ async function updateQuantity(cartId, productId, operation) {
 
 // Función para realizar el checkout del carrito
 async function checkoutCart(cartId) {
+    if (!cartId) {
+        console.error('No se proporcionó ID del carrito');
+        return;
+    }
+
     try {
         const response = await fetch(`/api/carts/${cartId}/checkout`, {
             method: 'POST'
         });
-        if (!response.ok) {
+        if (response.ok) {
+            const data = await response.json();
+            if (data.cartCleared) {
+                // Actualizar la interfaz de usuario
+                const cartList = document.getElementById('cartList');
+                cartList.innerHTML = '<p>Tu carrito está vacío.</p>';
+                console.log(data.message);
+            }
+        } else {
             throw new Error('Error al realizar checkout');
         }
-        // Actualiza la interfaz o notifica al usuario
-        console.log('Checkout completado');
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
+

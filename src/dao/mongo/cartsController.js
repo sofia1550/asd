@@ -44,17 +44,34 @@ module.exports = {
             const cart = await Cart.findById(req.params.cid).populate('products.product');
             if (!cart) return res.status(404).send('Carrito no encontrado');
 
-            // Aquí iría la lógica para procesar la compra, como reducir el stock, generar una orden, etc.
+            // Procesar cada producto en el carrito
+            for (const item of cart.products) {
+                const product = await Product.findById(item.product._id);
 
-            // Vaciar el carrito
+                if (!product) {
+                    return res.status(404).send(`Producto no encontrado: ${item.product._id}`);
+                }
+
+                // Verificar si hay suficiente stock
+                if (product.stock < item.quantity) {
+                    return res.status(400).send(`Stock insuficiente para el producto: ${product.title}`);
+                }
+
+                // Reducir el stock
+                product.stock -= item.quantity;
+                await product.save();
+            }
+
+            // Vaciar el carrito después de procesar la compra
             cart.products = [];
             await cart.save();
 
-            res.send('Compra realizada con éxito');
+            res.json({ message: 'Compra realizada con éxito', cartCleared: true });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
     },
+
     updateProductQuantityInCart: async (req, res) => {
         console.log(req.params.cid, req.params.pid, req.body.quantityChange);
 

@@ -22,7 +22,7 @@
         </li>
         {{/each}}
       </ul>
-      <button onclick="checkoutCart()">Checkout</button>
+    <button onclick="checkoutCart('{{cartId}}')">Checkout</button>
     {{else}}
       <p>Tu carrito está vacío.</p>
     {{/if}}
