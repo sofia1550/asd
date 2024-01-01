@@ -71,9 +71,7 @@ async function removeFromCart(cartId, productId) {
         return;
     }
     try {
-        const response = await fetch(`/api/carts/${cartId}/remove-from-cart/${productId}`, {
-            method: 'DELETE'
-        });
+        const response = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: 'DELETE' });
         if (!response.ok) {
             throw new Error('Error al eliminar producto del carrito');
         }
@@ -83,16 +81,21 @@ async function removeFromCart(cartId, productId) {
     }
 }
 
-async function updateQuantity(cartId, productId, quantity) {
+
+// Función para actualizar la cantidad de un producto en el carrito
+// Función para actualizar la cantidad de un producto en el carrito
+async function updateQuantity(cartId, productId, operation) {
+    console.log('Cart ID:', cartId, 'Product ID:', productId, 'Operation:', operation);
+
     if (!productId) {
         console.error('ID del producto no proporcionado');
         return;
     }
     try {
-        const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+        let endpoint = operation === 'increment' ? 'increment' : 'decrement';
+        const response = await fetch(`/api/carts/${cartId}/products/${productId}/${endpoint}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity })
+            headers: { 'Content-Type': 'application/json' }
         });
         if (!response.ok) {
             throw new Error('Error al actualizar la cantidad del producto');

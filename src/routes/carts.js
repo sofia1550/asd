@@ -18,7 +18,9 @@ router.post('/:cid/checkout', cartsController.checkoutCart);
 router.delete('/:cid/products/:pid', cartsController.removeProductFromCart);
 
 // Actualiza la cantidad de un producto en el carrito
-router.put('/:cid/products/:pid', cartsController.updateProductQuantityInCart);
+// Actualiza la cantidad de un producto en el carrito
+router.put('/:cid/products/:pid/increment', cartsController.incrementProductQuantityInCart);
+router.put('/:cid/products/:pid/decrement', cartsController.decrementProductQuantityInCart);
 
 // Vacia el carrito
 router.delete('/:cid', cartsController.emptyCart);

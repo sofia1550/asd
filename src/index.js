@@ -55,50 +55,48 @@ app.get('/chat', (req, res) => res.render('chat'));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
 app.get('/products', async (req, res) => {
   try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 3; // Cambiado de 10 a 3
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 3; // Cambiado de 10 a 3
 
-      // Crear objeto de filtros basado en el query, si existe
-      const filterOptions = req.query.query ? { title: { $regex: req.query.query, $options: 'i' } } : {};
+    // Crear objeto de filtros basado en el query, si existe
+    const filterOptions = req.query.query ? { title: { $regex: req.query.query, $options: 'i' } } : {};
 
-      // Opciones de ordenamiento
-      const sortOptions = req.query.sort === 'desc' ? { price: -1 } : req.query.sort === 'asc' ? { price: 1 } : {};
+    // Opciones de ordenamiento
+    const sortOptions = req.query.sort === 'desc' ? { price: -1 } : req.query.sort === 'asc' ? { price: 1 } : {};
 
-      const products = await Product.find(filterOptions)
-        .sort(sortOptions)
-        .limit(limit)
-        .skip((page - 1) * limit);
+    const products = await Product.find(filterOptions)
+      .sort(sortOptions)
+      .limit(limit)
+      .skip((page - 1) * limit);
 
-      const totalProducts = await Product.countDocuments(filterOptions);
-      const totalPages = Math.ceil(totalProducts / limit);
+    const totalProducts = await Product.countDocuments(filterOptions);
+    const totalPages = Math.ceil(totalProducts / limit);
 
-      res.render('products', {
-          products,
-          currentPage: page,
-          totalPages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-          nextPage: page + 1,
-          prevPage: page - 1,
-          lastPage: totalPages
-      });
+    res.render('products', {
+      products,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page + 1,
+      prevPage: page - 1,
+      lastPage: totalPages
+    });
   } catch (error) {
-      console.error('Error al obtener productos:', error);
-      res.status(500).send('Error al cargar la página');
+    console.error('Error al obtener productos:', error);
+    res.status(500).send('Error al cargar la página');
   }
 });
 
 app.get('/cart/:cid', async (req, res) => {
-  try {
-      const cartId = req.params.cid;
-      const cart = await Cart.findById(cartId).populate('products.product');
-      if (!cart) return res.status(404).render('cart', { cart: null });
-      res.render('cart', { cart: cart.products });
-  } catch (error) {
-      console.error('Error al obtener el carrito:', error);
-      res.status(500).render('cart', { error: 'Error al cargar el carrito' });
-  }
+  const cartId = req.params.cid;
+  const cart = await Cart.findById(cartId).populate('products.product');
+  // Verifica que cartId exista y sea válido
+  console.log("Cart ID en el servidor:", cartId);
+  if (!cart) return res.status(404).render('cart', { cart: null });
+  res.render('cart', { cart: cart.products, cartId: cartId });
 });
+
 
 const PORT = 8080;
 server.listen(PORT, () => console.log(`Servidor escuchando en el puerto ${PORT}`));

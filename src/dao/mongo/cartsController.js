@@ -56,24 +56,33 @@ module.exports = {
         }
     },
     updateProductQuantityInCart: async (req, res) => {
+        console.log(req.params.cid, req.params.pid, req.body.quantityChange);
+
         try {
             const cart = await Cart.findById(req.params.cid);
             if (!cart) return res.status(404).send('Carrito no encontrado');
 
-            const { quantity } = req.body;
             const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
-
-            if (productIndex !== -1 && quantity > 0) {
-                cart.products[productIndex].quantity = quantity;
-                await cart.save();
-                res.send('Cantidad actualizada');
-            } else {
-                res.status(404).send('Producto no encontrado en el carrito o cantidad inválida');
+            if (productIndex === -1) {
+                return res.status(404).send('Producto no encontrado en el carrito');
             }
+
+            const quantityChange = req.body.quantityChange;
+            cart.products[productIndex].quantity += quantityChange;
+
+            if (cart.products[productIndex].quantity <= 0) {
+                cart.products.splice(productIndex, 1);
+            }
+
+            await cart.save();
+            res.send('Cantidad actualizada');
         } catch (error) {
+            console.error('Error en updateProductQuantityInCart:', error);
             res.status(500).json({ error: error.message });
         }
     },
+
+
     emptyCart: async (req, res) => {
         try {
             const cart = await Cart.findById(req.params.cid);
@@ -86,6 +95,53 @@ module.exports = {
             res.status(500).json({ error: error.message });
         }
     },
+    // Incrementa la cantidad de un producto en el carrito
+    incrementProductQuantityInCart: async (req, res) => {
+        try {
+            const cart = await Cart.findById(req.params.cid);
+            if (!cart) return res.status(404).send('Carrito no encontrado');
+
+            const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
+            if (productIndex === -1) {
+                return res.status(404).send('Producto no encontrado en el carrito');
+            }
+
+            cart.products[productIndex].quantity += 1; // Incrementa la cantidad
+
+            await cart.save();
+            res.send('Cantidad incrementada');
+        } catch (error) {
+            console.error('Error en incrementProductQuantityInCart:', error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // Decrementa la cantidad de un producto en el carrito
+    decrementProductQuantityInCart: async (req, res) => {
+        try {
+            const cart = await Cart.findById(req.params.cid);
+            if (!cart) return res.status(404).send('Carrito no encontrado');
+
+            const productIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
+            if (productIndex === -1) {
+                return res.status(404).send('Producto no encontrado en el carrito');
+            }
+
+            cart.products[productIndex].quantity -= 1; // Disminuye la cantidad
+
+            // Eliminar el producto si la cantidad es 0 o menor
+            if (cart.products[productIndex].quantity <= 0) {
+                cart.products.splice(productIndex, 1);
+            }
+
+            await cart.save();
+            res.send('Cantidad decrementada');
+        } catch (error) {
+            console.error('Error en decrementProductQuantityInCart:', error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
     addProductToCart: async (req, res) => {
         const { productId } = req.body;
         const cartId = req.params.cid;

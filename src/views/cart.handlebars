@@ -14,24 +14,21 @@
           <li class="cart-item">
             <h3>{{this.product.title}}</h3>
             <p>Cantidad: {{this.quantity}}</p>
-            <button
-              onclick="updateQuantity('{{this.product._id}}', 'increment')"
-            >+</button>
-            <button
-              onclick="updateQuantity('{{this.product._id}}', 'decrement')"
-            >-</button>
-            <button
-              onclick="removeFromCart('{{this.product._id}}')"
-            >Eliminar</button>
+           <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'increment')">+</button>
+           <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'decrement')">-</button>
+           <button onclick="removeFromCart('{{../cartId}}', '{{this.product._id}}')">Eliminar</button>
+
           </li>
         {{/each}}
       </ul>
-        <button onclick="checkoutCart()">Checkout</button>
+      <button onclick="checkoutCart()">Checkout</button>
     {{else}}
       <p>Tu carrito está vacío.</p>
     {{/if}}
 
     <script src="/main.js"></script>
-    <!-- Asegúrate de enlazar tu archivo JavaScript -->
+    <script>
+      console.log("Cart ID desde Handlebars:", "{{cartId}}");
+    </script>
   </body>
 </html>
