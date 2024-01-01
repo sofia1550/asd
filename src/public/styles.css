@@ -115,7 +115,8 @@ button:hover {
     border: 1px solid #ddd;
     padding: 20px;
     margin: 20px auto;
-    width: 70%;
+    width: 80%;
+    max-width: 600px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     text-align: center;
@@ -133,8 +134,51 @@ button:hover {
     margin-top: 20px;
 }
 
-.product-actions a {
+.product-actions button, .product-actions a {
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    padding: 10px 15px;
     text-decoration: none;
-    color: #5c6bc0;
-    margin-left: 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+.product-actions button:hover, .product-actions a:hover {
+    background-color: #3949ab;
+}
+
+.navbar {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.cart-icon {
+    position: relative;
+}
+
+.badge {
+    background-color: red;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 50%;
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+}
+
+.fa-shopping-cart {
+    font-size: 20px;
 }

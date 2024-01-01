@@ -10,14 +10,25 @@ function redirectToCart() {
         console.error('No hay un carrito disponible');
     }
 }
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
 
+    document.body.appendChild(notification);
+
+    // Eliminar la notificación después de 3 segundos
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
 document.addEventListener('DOMContentLoaded', async () => {
     if (!getCartId()) {
         try {
             const response = await fetch('/api/carts/', { method: 'POST' });
             if (response.ok) {
                 const cart = await response.json();
-                localStorage.setItem('cartId', cart._id); 
+                localStorage.setItem('cartId', cart._id);
             } else {
                 console.error('No se pudo crear un carrito');
             }
@@ -58,8 +69,10 @@ async function addToCart(productId) {
             throw new Error('Error al agregar producto al carrito');
         }
         console.log('Producto agregado al carrito');
+        showNotification('Producto agregado al carrito');
     } catch (error) {
         console.error('Error al agregar producto al carrito:', error);
+        showNotification('Error al agregar producto al carrito', 'error');
     }
 }
 
@@ -80,6 +93,8 @@ async function removeFromCart(cartId, productId) {
     } catch (error) {
         console.error('Error:', error);
     }
+    showNotification('Producto eliminado del carrito');
+
 }
 
 
@@ -130,8 +145,12 @@ async function checkoutCart(cartId) {
                 const cartList = document.getElementById('cartList');
                 cartList.innerHTML = '<p>Tu carrito está vacío.</p>';
                 console.log(data.message);
+                showNotification('Checkout realizado con éxito');
+
             }
         } else {
+            showNotification('Error al realizar checkout', 'error');
+
             throw new Error('Error al realizar checkout');
         }
     } catch (error) {

@@ -6,30 +6,26 @@
   </head>
   <body>
     <h1>Lista de Productos</h1>
-
     <ul id="productList">
-     {{#each products}}
-  <li class="product-item">
-    <a href="/products/{{this._id}}/detail">
-      <h3>{{this.title}}</h3>
-    </a>
-
+      {{#each products}}
+        <li class="product-item">
+          <a href="/products/{{this._id}}/detail">
+            <h3>{{this.title}}</h3>
+          </a>
           <p>{{this.description}}</p>
           <p>Precio: {{this.price}}$</p>
           {{#if this.thumbnails}}
-           <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image"/>
-
+            <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image"/>
           {{/if}}
-
           <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
         </li>
       {{/each}}
-
     </ul>
+
+
     <div>
       <button onclick="redirectToCart()">Ir al Carrito</button>
     </div>
-
     <div id="pagination">
       {{#if hasPrevPage}}
         <a href="?page={{prevPage}}">&laquo; Anterior</a>
@@ -42,7 +38,6 @@
         <a href="?page={{nextPage}}">Siguiente &raquo;</a>
       {{/if}}
     </div>
-
     <script src="/main.js"></script>
   </body>
 </html>
