@@ -106,15 +106,15 @@ module.exports = {
                 return res.status(404).send('Producto no encontrado en el carrito');
             }
 
-            cart.products[productIndex].quantity += 1; // Incrementa la cantidad
-
+            cart.products[productIndex].quantity += 1;
             await cart.save();
-            res.send('Cantidad incrementada');
+            res.json({ quantity: cart.products[productIndex].quantity }); // Devuelve la cantidad actualizada
         } catch (error) {
             console.error('Error en incrementProductQuantityInCart:', error);
             res.status(500).json({ error: error.message });
         }
     },
+
 
     // Decrementa la cantidad de un producto en el carrito
     decrementProductQuantityInCart: async (req, res) => {
@@ -127,20 +127,22 @@ module.exports = {
                 return res.status(404).send('Producto no encontrado en el carrito');
             }
 
-            cart.products[productIndex].quantity -= 1; // Disminuye la cantidad
+            cart.products[productIndex].quantity -= 1;
 
-            // Eliminar el producto si la cantidad es 0 o menor
             if (cart.products[productIndex].quantity <= 0) {
                 cart.products.splice(productIndex, 1);
+                await cart.save();
+                res.send('Producto eliminado del carrito');
+            } else {
+                await cart.save();
+                res.json({ quantity: cart.products[productIndex].quantity }); // Devuelve la cantidad actualizada
             }
-
-            await cart.save();
-            res.send('Cantidad decrementada');
         } catch (error) {
             console.error('Error en decrementProductQuantityInCart:', error);
             res.status(500).json({ error: error.message });
         }
     },
+
 
     addProductToCart: async (req, res) => {
         const { productId } = req.body;

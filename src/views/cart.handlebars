@@ -11,14 +11,15 @@
     {{#if cart}}
       <ul id="cartList">
         {{#each cart}}
-          <li class="cart-item">
+        <li class="cart-item" id="cart_item_{{this.product._id}}">
             <h3>{{this.product.title}}</h3>
-            <p>Cantidad: {{this.quantity}}</p>
-           <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'increment')">+</button>
-           <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'decrement')">-</button>
-           <button onclick="removeFromCart('{{../cartId}}', '{{this.product._id}}')">Eliminar</button>
-
-          </li>
+            <p>
+                <p>Cantidad: <span id="quantity_{{this.product._id}}">{{this.quantity}}</span></p>
+            </p>
+              <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'increment')">+</button>
+              <button onclick="updateQuantity('{{../cartId}}', '{{this.product._id}}', 'decrement')">-</button>
+              <button onclick="removeFromCart('{{../cartId}}', '{{this.product._id}}')">Eliminar</button>
+        </li>
         {{/each}}
       </ul>
       <button onclick="checkoutCart()">Checkout</button>

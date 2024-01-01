@@ -72,7 +72,9 @@ async function removeFromCart(cartId, productId) {
     }
     try {
         const response = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: 'DELETE' });
-        if (!response.ok) {
+        if (response.ok) {
+            document.querySelector(`#cart_item_${productId}`).remove(); // Elimina el elemento del DOM
+        } else {
             throw new Error('Error al eliminar producto del carrito');
         }
         console.log('Producto eliminado del carrito');
@@ -85,8 +87,6 @@ async function removeFromCart(cartId, productId) {
 // Función para actualizar la cantidad de un producto en el carrito
 // Función para actualizar la cantidad de un producto en el carrito
 async function updateQuantity(cartId, productId, operation) {
-    console.log('Cart ID:', cartId, 'Product ID:', productId, 'Operation:', operation);
-
     if (!productId) {
         console.error('ID del producto no proporcionado');
         return;
@@ -97,14 +97,21 @@ async function updateQuantity(cartId, productId, operation) {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' }
         });
-        if (!response.ok) {
+        if (response.ok) {
+            try {
+                const updatedProduct = await response.json(); 
+                document.querySelector(`#quantity_${productId}`).textContent = updatedProduct.quantity; 
+            } catch (error) {
+                console.error('Error al parsear la respuesta JSON:', error);
+            }
+        } else {
             throw new Error('Error al actualizar la cantidad del producto');
         }
-        console.log('Cantidad actualizada');
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
 
 
 // Función para realizar el checkout del carrito
