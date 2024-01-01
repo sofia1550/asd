@@ -32,7 +32,52 @@ module.exports = function (io) {
             res.status(500).json({ status: 'error', error: error.message });
         }
     };
+    const getProductDetail = async (req, res) => {
+        try {
+            const product = await Product.findById(req.params.pid);
+            if (!product) return res.status(404).send('Producto no encontrado');
+            res.render('productDetail', { product });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+    const renderProductsPage = async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 3; 
 
+            const options = {
+                page,
+                limit,
+                sort: { createdAt: -1 } 
+            };
+
+            const result = await Product.paginate({}, options);
+
+            res.render('products', {
+                products: result.docs,
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage,
+                nextPage: result.nextPage,
+                prevPage: result.prevPage,
+                lastPage: result.totalPages
+            });
+        } catch (error) {
+            res.status(500).send('Error al cargar la página');
+        }
+    };
+
+
+    const renderProductDetailPage = async (req, res) => {
+        try {
+            const product = await Product.findById(req.params.pid);
+            res.render('productDetail', { product });
+        } catch (error) {
+            res.status(500).send('Error al cargar la página');
+        }
+    };
     const getProductById = async (req, res) => {
         try {
             const product = await Product.findById(req.params.pid);
@@ -84,10 +129,13 @@ module.exports = function (io) {
     };
 
     return {
+        getProductDetail,
         getAllProducts,
         getProductById,
         createProduct,
         updateProduct,
-        deleteProduct
+        deleteProduct,
+        renderProductDetailPage,
+        renderProductsPage,
     };
 };

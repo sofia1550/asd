@@ -3,7 +3,7 @@ const router = express.Router();
 const cartsController = require('../dao/mongo/cartsController');
 
 // Crea un nuevo carrito
-router.post('/', cartsController.createCart); // Cambia '/create-cart' a '/'
+router.post('/', cartsController.createCart); 
 
 // Obtiene los productos de un carrito específico
 router.get('/:cid', cartsController.getCartProducts);
@@ -17,7 +17,6 @@ router.post('/:cid/checkout', cartsController.checkoutCart);
 // Elimina un producto del carrito
 router.delete('/:cid/products/:pid', cartsController.removeProductFromCart);
 
-// Actualiza la cantidad de un producto en el carrito
 // Actualiza la cantidad de un producto en el carrito
 router.put('/:cid/products/:pid/increment', cartsController.incrementProductQuantityInCart);
 router.put('/:cid/products/:pid/decrement', cartsController.decrementProductQuantityInCart);

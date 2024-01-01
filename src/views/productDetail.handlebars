@@ -1,0 +1,28 @@
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Detalle del Producto</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <h1>{{product.title}}</h1>
+    <div class="product-detail">
+      {{#if product.image}}
+        <img
+          src="{{product.image}}"
+          alt="{{product.title}}"
+          class="product-image"
+        />
+      {{/if}}
+      <p>{{product.description}}</p>
+      <p>Precio: ${{product.price}}</p>
+    </div>
+    <div class="product-actions">
+      <button onclick="addToCart('{{product._id}}')">Agregar al Carrito</button>
+      <button onclick="redirectToCart()">Ir al Carrito</button>
+      <a href="/products">Volver a la Lista de Productos</a>
+    </div>
+
+    <script src="/main.js"></script>
+  </body>
+</html>

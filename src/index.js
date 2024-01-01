@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const Product = require('./dao/models/products');
 const Message = require('./dao/models/message');
 const Cart = require('./dao/models/cart');
+
 // Conexión a MongoDB con la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conectado a MongoDB Atlas'))
@@ -19,25 +20,21 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Configuración de Handlebars y rutas estáticas
-const handlebars = engine({
+app.engine('handlebars', engine({
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
     allowProtoMethodsByDefault: true,
-  },
-});
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.engine('handlebars', handlebars);
+  }
+}));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Importación de rutas
-const cartRoutes = require('./routes/carts');
-const productRoutes = require('./routes/products')(io);
-app.use('/api/products', productRoutes);
-app.use('/api/carts', cartRoutes);
+app.use('/products', require('./routes/products')(io));
+app.use('/api/products', require('./routes/api/apiProducts')(io));
+app.use('/api/carts', require('./routes/carts'));
 
 // Rutas principales
 app.get('/', async (req, res) => {
@@ -49,19 +46,16 @@ app.get('/', async (req, res) => {
     res.status(500).send('Error al cargar la página');
   }
 });
-app.get('/cart', (req, res) => res.render('cart'));
 
+app.get('/cart', (req, res) => res.render('cart'));
 app.get('/chat', (req, res) => res.render('chat'));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
+
 app.get('/products', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 3; // Cambiado de 10 a 3
-
-    // Crear objeto de filtros basado en el query, si existe
+    const limit = parseInt(req.query.limit) || 3;
     const filterOptions = req.query.query ? { title: { $regex: req.query.query, $options: 'i' } } : {};
-
-    // Opciones de ordenamiento
     const sortOptions = req.query.sort === 'desc' ? { price: -1 } : req.query.sort === 'asc' ? { price: 1 } : {};
 
     const products = await Product.find(filterOptions)
@@ -91,14 +85,12 @@ app.get('/products', async (req, res) => {
 app.get('/cart/:cid', async (req, res) => {
   const cartId = req.params.cid;
   const cart = await Cart.findById(cartId).populate('products.product');
-  // Verifica que cartId exista y sea válido
-  console.log("Cart ID en el servidor:", cartId);
   if (!cart) return res.status(404).render('cart', { cart: null });
   res.render('cart', { cart: cart.products, cartId: cartId });
 });
 
-
-const PORT = 8080;
+// Configuración del servidor y WebSockets
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Servidor escuchando en el puerto ${PORT}`));
 
 io.on('connection', async (socket) => {

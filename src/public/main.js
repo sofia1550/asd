@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/api/carts/', { method: 'POST' });
             if (response.ok) {
                 const cart = await response.json();
-                localStorage.setItem('cartId', cart._id); // Asegúrate de que el ID del carrito se esté devolviendo correctamente desde el servidor
+                localStorage.setItem('cartId', cart._id); 
             } else {
                 console.error('No se pudo crear un carrito');
             }
@@ -58,7 +58,6 @@ async function addToCart(productId) {
             throw new Error('Error al agregar producto al carrito');
         }
         console.log('Producto agregado al carrito');
-        redirectToCart(); // Redirige al carrito después de agregar el producto
     } catch (error) {
         console.error('Error al agregar producto al carrito:', error);
     }
@@ -84,7 +83,6 @@ async function removeFromCart(cartId, productId) {
 }
 
 
-// Función para actualizar la cantidad de un producto en el carrito
 // Función para actualizar la cantidad de un producto en el carrito
 async function updateQuantity(cartId, productId, operation) {
     if (!productId) {
