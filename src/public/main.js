@@ -27,12 +27,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 async function addToCart(productId) {
-    const cartId = getCartId();
+    let cartId = getCartId(); // Obtener el ID del carrito desde localStorage
+
+    // Crear un nuevo carrito si no existe uno
     if (!cartId) {
-        console.error('No hay un carrito disponible');
-        return;
+        try {
+            const response = await fetch('/api/carts/', { method: 'POST' });
+            if (response.ok) {
+                const cart = await response.json();
+                localStorage.setItem('cartId', cart._id); // Almacena el nuevo ID del carrito en localStorage
+                cartId = cart._id; // Actualiza la variable cartId con el nuevo ID del carrito
+            } else {
+                console.error('No se pudo crear un carrito');
+                return;
+            }
+        } catch (error) {
+            console.error('Error al crear un nuevo carrito:', error);
+            return;
+        }
     }
 
+    // Añadir el producto al carrito
     try {
         const response = await fetch(`/api/carts/${cartId}/add-to-cart`, {
             method: 'POST',
@@ -42,35 +57,19 @@ async function addToCart(productId) {
         if (!response.ok) {
             throw new Error('Error al agregar producto al carrito');
         }
-        // Actualiza la interfaz o notifica al usuario
         console.log('Producto agregado al carrito');
+        redirectToCart(); // Redirige al carrito después de agregar el producto
     } catch (error) {
-        console.error('Error:', error);
-    }
-    redirectToCart();
-
-}
-
-// Función para actualizar la cantidad de un producto en el carrito
-async function updateQuantity(cartId, productId, quantity) {
-    try {
-        const response = await fetch(`/api/carts/${cartId}/update-quantity`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, quantity })
-        });
-        if (!response.ok) {
-            throw new Error('Error al actualizar la cantidad del producto');
-        }
-        // Actualiza la interfaz o notifica al usuario
-        console.log('Cantidad actualizada');
-    } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al agregar producto al carrito:', error);
     }
 }
 
-// Función para eliminar un producto del carrito
+
 async function removeFromCart(cartId, productId) {
+    if (!productId) {
+        console.error('ID del producto no proporcionado');
+        return;
+    }
     try {
         const response = await fetch(`/api/carts/${cartId}/remove-from-cart/${productId}`, {
             method: 'DELETE'
@@ -78,12 +77,32 @@ async function removeFromCart(cartId, productId) {
         if (!response.ok) {
             throw new Error('Error al eliminar producto del carrito');
         }
-        // Actualiza la interfaz o notifica al usuario
         console.log('Producto eliminado del carrito');
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
+async function updateQuantity(cartId, productId, quantity) {
+    if (!productId) {
+        console.error('ID del producto no proporcionado');
+        return;
+    }
+    try {
+        const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity })
+        });
+        if (!response.ok) {
+            throw new Error('Error al actualizar la cantidad del producto');
+        }
+        console.log('Cantidad actualizada');
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 
 // Función para realizar el checkout del carrito
 async function checkoutCart(cartId) {

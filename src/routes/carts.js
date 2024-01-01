@@ -3,7 +3,7 @@ const router = express.Router();
 const cartsController = require('../dao/mongo/cartsController');
 
 // Crea un nuevo carrito
-router.post('/create-cart', cartsController.createCart);
+router.post('/', cartsController.createCart); // Cambia '/create-cart' a '/'
 
 // Obtiene los productos de un carrito específico
 router.get('/:cid', cartsController.getCartProducts);
