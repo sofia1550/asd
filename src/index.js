@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -9,6 +8,8 @@ const mongoose = require('mongoose');
 const Product = require('./dao/models/products');
 const Message = require('./dao/models/message');
 const Cart = require('./dao/models/cart');
+const authRoutes = require('./routes/auth');
+const session = require('express-session');
 
 // Conexión a MongoDB con la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -19,6 +20,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Configuración de la sesión debe estar aquí, después de inicializar Express
+app.use(session({
+  secret: 'mi secreto', // Cambia esto por una cadena secreta real
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Ponlo en true si estás usando HTTPS
+}));
+
 // Configuración de Handlebars y rutas estáticas
 app.engine('handlebars', engine({
   runtimeOptions: {
@@ -26,15 +35,24 @@ app.engine('handlebars', engine({
     allowProtoMethodsByDefault: true,
   }
 }));
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+app.get('/login', (req, res) => {
+  res.render('login');
+});
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Importación de rutas
 app.use('/products', require('./routes/products')(io));
 app.use('/api/products', require('./routes/api/apiProducts')(io));
 app.use('/api/carts', require('./routes/carts'));
+app.use('/api/auth', authRoutes);
 
 // Rutas principales
 app.get('/', async (req, res) => {
