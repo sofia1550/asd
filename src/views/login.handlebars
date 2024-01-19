@@ -1,16 +1,28 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <!-- Puedes añadir aquí tu CSS o referencias a frameworks CSS si lo deseas -->
+  </head>
+  <body>
+    <!-- Formulario de Login -->
     <form action="/api/auth/login" method="post">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Contraseña" required>
-    <button type="submit">Login</button>
-</form>
+      <input type="email" name="email" placeholder="Email" required />
+      <input
+        type="password"
+        name="password"
+        placeholder="Contraseña"
+        required
+      />
+      <button type="submit">Login</button>
+    </form>
 
-</body>
+    <!-- Botón para Login con GitHub -->
+    <a href="/api/auth/github" style="margin-top: 10px; display: inline-block;">
+      <button>Login con GitHub</button>
+    </a>
+
+    <!-- Aquí puedes añadir scripts o referencias a JS si lo necesitas -->
+  </body>
 </html>

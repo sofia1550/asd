@@ -10,6 +10,8 @@ const Message = require('./dao/models/message');
 const Cart = require('./dao/models/cart');
 const authRoutes = require('./routes/auth');
 const session = require('express-session');
+const jwt = require('jsonwebtoken');
+const passport = require('./passportConfig');
 
 // Conexión a MongoDB con la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -27,7 +29,8 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Ponlo en true si estás usando HTTPS
 }));
-
+app.use(passport.initialize());
+app.use(passport.session());
 // Configuración de Handlebars y rutas estáticas
 app.engine('handlebars', engine({
   runtimeOptions: {
@@ -61,6 +64,22 @@ app.get('/', async (req, res) => {
     res.render('home', { products });
   } catch (error) {
     console.error('Error al obtener productos:', error);
+    res.status(500).send('Error al cargar la página');
+  }
+});
+app.get('/', async (req, res) => {
+  try {
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+        if (err) return res.redirect('/login');
+        // Aquí, busca los datos del usuario con decoded.id y muestra la página con esos datos
+      });
+    } else {
+      res.redirect('/login');
+    }
+  } catch (error) {
+    console.error('Error:', error);
     res.status(500).send('Error al cargar la página');
   }
 });
