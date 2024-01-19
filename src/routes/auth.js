@@ -3,7 +3,7 @@ const User = require('../dao/models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const passport = require('../passportConfig'); // Asegúrate de que la ruta sea correcta
+const passport = require('../passportConfig'); 
 
 // Registro
 router.post('/register', async (req, res) => {
