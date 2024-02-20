@@ -1,7 +1,7 @@
-const User = require('../../dao/models/User'); // Actualiza la ruta según tu estructura
+const User = require('../../dao/models/User'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const passport = require('../../passportConfig'); // Asegúrate de que la ruta sea correcta
+const passport = require('../../passportConfig'); 
 
 exports.register = async (req, res) => {
     try {

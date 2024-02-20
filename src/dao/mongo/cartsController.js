@@ -1,5 +1,6 @@
 const Cart = require('../models/cart');
 const Product = require('../models/products');
+const Ticket = require('../models/Ticket');
 
 module.exports = {
     createCart: async (req, res) => {
@@ -39,38 +40,57 @@ module.exports = {
             res.status(500).json({ error: error.message });
         }
     },
+
     checkoutCart: async (req, res) => {
         try {
             const cart = await Cart.findById(req.params.cid).populate('products.product');
             if (!cart) return res.status(404).send('Carrito no encontrado');
 
-            // Procesar cada producto en el carrito
-            for (const item of cart.products) {
-                const product = await Product.findById(item.product._id);
+            let totalAmount = 0;
+            const productsToUpdate = [];
+            const productsNotAvailable = [];
 
-                if (!product) {
-                    return res.status(404).send(`Producto no encontrado: ${item.product._id}`);
-                }
-
-                // Verificar si hay suficiente stock
+            // Verificar disponibilidad de stock para cada producto
+            cart.products.forEach(item => {
+                const product = item.product;
                 if (product.stock < item.quantity) {
-                    return res.status(400).send(`Stock insuficiente para el producto: ${product.title}`);
+                    productsNotAvailable.push({ productId: product._id, title: product.title });
+                } else {
+                    totalAmount += product.price * item.quantity;
+                    productsToUpdate.push({ product, quantity: item.quantity });
                 }
+            });
 
-                // Reducir el stock
-                product.stock -= item.quantity;
-                await product.save();
+            // Actualizar el stock de los productos disponibles y generar el ticket
+            if (productsNotAvailable.length === 0) {
+                await Promise.all(productsToUpdate.map(({ product, quantity }) =>
+                    Product.findByIdAndUpdate(product._id, { $inc: { stock: -quantity } })
+                ));
+
+                // Obtener el email del comprador de la sesión o del token JWT
+                const purchaserEmail = req.user.email; // Asegúrate de tener una autenticación adecuada
+
+                const ticket = new Ticket({
+                    purchaser: purchaserEmail,
+                    amount: totalAmount,
+                });
+                await ticket.save();
+
+                // Vaciar el carrito después de procesar la compra
+                cart.products = [];
+                await cart.save();
+
+                res.json({ message: 'Compra realizada con éxito', ticketId: ticket._id, cartCleared: true });
+            } else {
+                // Informar productos no disponibles si los hay
+                res.status(400).json({ message: 'Algunos productos no están disponibles', productsNotAvailable });
             }
-
-            // Vaciar el carrito después de procesar la compra
-            cart.products = [];
-            await cart.save();
-
-            res.json({ message: 'Compra realizada con éxito', cartCleared: true });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
     },
+
+
 
     updateProductQuantityInCart: async (req, res) => {
         console.log(req.params.cid, req.params.pid, req.body.quantityChange);
