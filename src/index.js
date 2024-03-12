@@ -12,6 +12,8 @@ const authRoutes = require('./routes/auth');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const passport = require('./passportConfig');
+const generateMockProducts = require('./mockData'); // Asegúrate de usar la ruta correcta al archivo
+const errorHandler = require('./errorHandler'); // Asegúrate de usar la ruta correcta
 
 // Conexión a MongoDB con la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -29,6 +31,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Ponlo en true si estás usando HTTPS
 }));
+app.use(errorHandler);
 app.use(passport.initialize());
 app.use(passport.session());
 // Configuración de Handlebars y rutas estáticas
@@ -43,6 +46,10 @@ app.get('/register', (req, res) => {
 });
 app.get('/login', (req, res) => {
   res.render('login');
+});
+app.get('/mockingproducts', (req, res) => {
+  const products = generateMockProducts();
+  res.json(products);
 });
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
