@@ -1,7 +1,7 @@
 const Product = require('../models/products');
 
 module.exports = function (io) {
-    const getAllProducts = async (req, res) => {
+    const getAllProducts = async (req, res, next) => {
         try {
             const { limit = 10, page = 1, sort = '', query = '' } = req.query;
             const options = {
@@ -9,12 +9,12 @@ module.exports = function (io) {
                 limit: parseInt(limit, 10),
                 sort: { price: sort === 'desc' ? -1 : 1 }
             };
-
+    
             let filter = {};
             if (query) {
                 filter = { title: { $regex: query, $options: 'i' } };
             }
-
+    
             const result = await Product.paginate(filter, options);
             res.json({
                 status: 'success',
@@ -29,9 +29,10 @@ module.exports = function (io) {
                 nextLink: result.nextPage ? `/api/products?page=${result.nextPage}` : null
             });
         } catch (error) {
-            res.status(500).json({ status: 'error', error: error.message });
+            next(error); // Pasar el error al middleware de manejo de errores
         }
     };
+    
     const getProductDetail = async (req, res) => {
         try {
             const product = await Product.findById(req.params.pid);
