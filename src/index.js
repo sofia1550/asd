@@ -14,8 +14,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('./passportConfig');
 const generateMockProducts = require('./mockData');
 const errorHandler = require('./errorHandler');
-const logger = require('./logger/logger'); // Selecciona automáticamente el logger basado en NODE_ENV
-
+const logger = require('./logger');
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => logger.info('Conectado a MongoDB Atlas'))
   .catch(err => logger.error('Error conectando a MongoDB Atlas:', err));
