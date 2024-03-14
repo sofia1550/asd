@@ -1,12 +1,12 @@
-const winston = require('winston');
+import { createLogger, format as _format, transports as _transports } from 'winston';
 
 // Logger para desarrollo
-const logger = winston.createLogger({
+const logger = createLogger({
   level: 'debug',
-  format: winston.format.cli(),
+  format: _format.cli(),
   transports: [
-    new winston.transports.Console(),
+    new _transports.Console(),
   ],
 });
 
-module.exports = logger;
+export default logger;

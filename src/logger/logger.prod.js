@@ -1,14 +1,14 @@
-const winston = require('winston');
-const path = require('path');
+import { createLogger, format as _format, transports as _transports } from 'winston';
+import { join } from 'path';
 
 // Logger para producción
-const logger = winston.createLogger({
+const logger = createLogger({
   level: 'info',
-  format: winston.format.json(),
+  format: _format.json(),
   transports: [
-    new winston.transports.File({ filename: path.join(__dirname, 'errors.log'), level: 'error' }),
-    new winston.transports.Console(),
+    new _transports.File({ filename: join(__dirname, 'errors.log'), level: 'error' }),
+    new _transports.Console(),
   ],
 });
 
-module.exports = logger;
+export default logger;
