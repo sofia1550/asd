@@ -12,29 +12,28 @@ const authRoutes = require('./routes/auth');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const passport = require('./passportConfig');
-const generateMockProducts = require('./mockData'); // Asegúrate de usar la ruta correcta al archivo
-const errorHandler = require('./errorHandler'); // Asegúrate de usar la ruta correcta
+const generateMockProducts = require('./mockData');
+const errorHandler = require('./errorHandler');
+const logger = require('./logger/logger'); // Selecciona automáticamente el logger basado en NODE_ENV
 
-// Conexión a MongoDB con la variable de entorno
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Conectado a MongoDB Atlas'))
-  .catch(err => console.error('Error conectando a MongoDB Atlas:', err));
+  .then(() => logger.info('Conectado a MongoDB Atlas'))
+  .catch(err => logger.error('Error conectando a MongoDB Atlas:', err));
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Configuración de la sesión debe estar aquí, después de inicializar Express
 app.use(session({
-  secret: 'mi secreto', // Cambia esto por una cadena secreta real
+  secret: 'mi secreto',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Ponlo en true si estás usando HTTPS
+  cookie: { secure: false }
 }));
 app.use(errorHandler);
 app.use(passport.initialize());
 app.use(passport.session());
-// Configuración de Handlebars y rutas estáticas
+
 app.engine('handlebars', engine({
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
@@ -63,6 +62,16 @@ app.use('/products', require('./routes/products')(io));
 app.use('/api/products', require('./routes/api/apiProducts')(io));
 app.use('/api/carts', require('./routes/carts'));
 app.use('/api/auth', authRoutes);
+
+// Agrega un endpoint para probar el logging
+app.get('/loggerTest', (req, res) => {
+  logger.debug('Test de debug');
+  logger.http('Test de http');
+  logger.info('Test de info');
+  logger.warn('Test de warning');
+  logger.error('Test de error');
+  res.send('Prueba de logger finalizada. Chequea los registros.');
+});
 
 // Rutas principales
 app.get('/', async (req, res) => {
@@ -135,10 +144,10 @@ app.get('/cart/:cid', async (req, res) => {
 
 // Configuración del servidor y WebSockets
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => console.log(`Servidor escuchando en el puerto ${PORT}`));
+server.listen(PORT, () => logger.info(`Servidor escuchando en el puerto ${PORT}`));
 
 io.on('connection', async (socket) => {
-  console.log('Un cliente se ha conectado');
+  logger.info('Un cliente se ha conectado');
 
   try {
     const messages = await Message.find({}).sort({ timestamp: -1 }).limit(50);
