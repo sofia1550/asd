@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     age: Number,
     password: { type: String, required: true },
     cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' }, // Asegúrate de tener un modelo Cart
-    role: { type: String, default: 'user' },
+    role: { type: String, enum: ['user', 'admin', 'premium'], default: 'user' },
 });
 
 userSchema.pre('save', async function(next) {

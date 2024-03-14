@@ -1,4 +1,5 @@
 const Product = require('../models/products');
+const User = require('../models/User'); 
 
 module.exports = function (io) {
     const getAllProducts = async (req, res, next) => {
@@ -91,8 +92,11 @@ module.exports = function (io) {
 
     const createProduct = async (req, res) => {
         try {
-            const newProduct = new Product(req.body);
-            // Aquí puedes añadir validaciones adicionales si lo necesitas
+            const productData = {
+                ...req.body,
+                owner: req.user?._id, // Asigna el _id del usuario autenticado como el owner
+            };
+            const newProduct = new Product(productData);
             await newProduct.save();
             io.emit('updateProductList', await Product.find({}));
             res.status(201).json(newProduct);
@@ -100,35 +104,45 @@ module.exports = function (io) {
             res.status(500).json({ error: error.message });
         }
     };
-
-    const updateProduct = async (productId, updatedData) => {
+    const updateProduct = async (req, res) => {
         try {
-            const product = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
+            const product = await Product.findById(req.params.productId);
             if (!product) {
-                io.emit('productError', 'Producto no encontrado');
-                return;
-            }
-            io.emit('updateProductList', await Product.find({}));
-        } catch (error) {
-            io.emit('productError', error.message);
-        }
-    };
-
-    const deleteProduct = async (productId, res) => {
-        try {
-            const product = await Product.findByIdAndDelete(productId);
-            if (!product) {
-                io.emit('productError', 'Producto no encontrado');
                 return res.status(404).send('Producto no encontrado');
             }
-            io.emit('updateProductList', await Product.find({}));
-            res.send('Producto eliminado con éxito');
+            // Verificar si el usuario es el owner o un admin
+            if (product.owner.equals(req.user._id) || req.user.role === 'admin') {
+                const updatedProduct = await Product.findByIdAndUpdate(req.params.productId, req.body, { new: true });
+                io.emit('updateProductList', await Product.find({}));
+                res.json(updatedProduct);
+            } else {
+                res.status(403).send('No autorizado para modificar este producto');
+            }
         } catch (error) {
             io.emit('productError', error.message);
             res.status(500).json({ error: error.message });
         }
     };
 
+    const deleteProduct = async (req, res) => {
+        try {
+            const product = await Product.findById(req.params.productId);
+            if (!product) {
+                return res.status(404).send('Producto no encontrado');
+            }
+            // Verificar si el usuario es el owner o un admin
+            if (product.owner.equals(req.user._id) || req.user.role === 'admin') {
+                await Product.findByIdAndDelete(req.params.productId);
+                io.emit('updateProductList', await Product.find({}));
+                res.send('Producto eliminado con éxito');
+            } else {
+                res.status(403).send('No autorizado para eliminar este producto');
+            }
+        } catch (error) {
+            io.emit('productError', error.message);
+            res.status(500).json({ error: error.message });
+        }
+    };
     return {
         getProductDetail,
         getAllProducts,

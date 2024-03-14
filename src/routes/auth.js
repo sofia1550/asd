@@ -20,5 +20,18 @@ router.get('/github', passport.authenticate('github'));
 router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
     res.redirect('/');
 });
+router.patch('/premium/:uid', async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const user = await User.findById(uid);
+        if (!user) return res.status(404).send('Usuario no encontrado');
 
+        user.role = user.role === 'premium' ? 'user' : 'premium';
+        await user.save();
+
+        res.json({ message: `Rol cambiado a ${user.role} exitosamente` });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 module.exports = router;
