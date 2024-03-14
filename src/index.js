@@ -78,7 +78,7 @@ app.get('/', async (req, res) => {
     const products = await Product.find({});
     res.render('home', { products });
   } catch (error) {
-    console.error('Error al obtener productos:', error);
+    logger.error('Error al obtener productos:', error); // Modificado para usar Winston
     res.status(500).send('Error al cargar la página');
   }
 });
@@ -87,18 +87,20 @@ app.get('/', async (req, res) => {
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(' ')[1];
       jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        if (err) return res.redirect('/login');
+        if (err) {
+          logger.error('Error al verificar el token:', err); // Modificado para usar Winston
+          return res.redirect('/login');
+        }
         // Aquí, busca los datos del usuario con decoded.id y muestra la página con esos datos
       });
     } else {
       res.redirect('/login');
     }
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error); // Modificado para usar Winston
     res.status(500).send('Error al cargar la página');
   }
 });
-
 app.get('/cart', (req, res) => res.render('cart'));
 app.get('/chat', (req, res) => res.render('chat'));
 app.get('/realtimeproducts', (req, res) => res.render('realTimeProducts'));
@@ -152,7 +154,7 @@ io.on('connection', async (socket) => {
     const messages = await Message.find({}).sort({ timestamp: -1 }).limit(50);
     socket.emit('previousMessages', messages);
   } catch (error) {
-    console.error('Error al recuperar mensajes:', error);
+    logger.error('Error al recuperar mensajes:', error); // Modificado para usar Winston
   }
 
   socket.on('newMessage', async (msg) => {
@@ -163,7 +165,7 @@ io.on('connection', async (socket) => {
       await newMessage.save();
       io.emit('message', newMessage);
     } catch (error) {
-      console.error('Error al guardar el mensaje:', error);
+      logger.error('Error al guardar el mensaje:', error); // Modificado para usar Winston
     }
   });
 });
