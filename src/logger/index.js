@@ -5,4 +5,4 @@ const logger = env === 'production'
     ? require('./logger.prod').default 
     : require('./logger').default;
 
-module.exports = logger;
+export default logger;
