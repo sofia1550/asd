@@ -14,7 +14,50 @@ exports.register = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+exports.resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+    const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() }
+    });
 
+    if (!user) {
+        return res.status(400).send('Token de recuperación inválido o expirado.');
+    }
+
+    if (await user.comparePassword(newPassword)) {
+        return res.status(400).send('La nueva contraseña no puede ser igual a la contraseña actual.');
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    // Aquí podrías enviar un correo confirmando el cambio de contraseña
+
+    res.send('Contraseña restablecida con éxito.');
+};
+exports.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).send('Usuario no encontrado.');
+    }
+
+    // Genera un token único (puedes usar `crypto` de Node.js para esto)
+    const token = require('crypto').randomBytes(20).toString('hex');
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora en milisegundos
+    await user.save();
+
+    // Envía el email (puedes usar nodemailer)
+    const resetUrl = `http://${req.headers.host}/reset/${token}`;
+    // Aquí iría la lógica para enviar el correo con nodemailer u otro servicio, incluyendo resetUrl en el contenido
+
+    res.send('Se ha enviado un enlace de recuperación de contraseña.');
+};
 exports.login = (req, res, next) => {
     passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err || !user) {
